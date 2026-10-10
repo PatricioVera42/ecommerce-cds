@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
+import {env} from "./lib/env.js";
 
 const app = express();
-const PORT = 3000;
+const PORT = env.PORT;
 
 app.use(cors());
 app.use(express.json());
