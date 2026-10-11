@@ -3,6 +3,7 @@ import cors from "cors";
 import {env} from "./lib/env.js";
 import { notFound } from "./middleware/not-found.js";
 import { errorHandler } from "./middleware/error-handler.js";
+import { authRouter } from "./routes/auth.js";
 
 const app = express();
 const PORT = env.PORT;
@@ -13,6 +14,8 @@ app.use(express.json());
 app.get("/health", (_req, res) => {
     res.json({ ok: true});
 });
+
+app.use("/auth", authRouter);
 
 app.use(notFound);
 app.use(errorHandler);
