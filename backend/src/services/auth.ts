@@ -38,3 +38,13 @@ export async function login(data: {email: string, password: string }){
     
     return { token, user: safeUser};
 }
+
+export async function getMe(id: string){
+
+    const user = await prisma.user.findUnique({ where: { id }, select: { id: true, name: true, email: true, role: true } });
+    if (!user){
+        throw new HttpError(401, "Sesión inválida");
+    }
+
+    return {user};
+}

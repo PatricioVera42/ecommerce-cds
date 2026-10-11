@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { register, login } from "../services/auth.js";
+import { register, login, getMe } from "../services/auth.js";
 import * as z from "zod";
+import { requireAuth } from "../middleware/require-auth.js";
 
 export const authRouter = Router();
+
+// REGISTER
 
 const registerBody = z.object({
     name: z.string().min(1, {error: "El nombre es obligatorio" }),
@@ -16,6 +19,8 @@ authRouter.post("/register", async (req, res) => {
     res.status(201).json(result);
 });
 
+// LOGIN
+
 const loginBody = z.object({
     email: z.email({ error: "El mail debe ser de un formato válido" }).transform((valor) => valor.toLowerCase()),
     password: z.string().min(1, { error: "La contraseña no puede ser vacía" }),
@@ -24,5 +29,11 @@ const loginBody = z.object({
 authRouter.post("/login", async (req, res) => {
     const data = loginBody.parse(req.body);
     const result = await login(data);
+    res.status(200).json(result);
+});
+
+
+authRouter.get("/me", requireAuth, async (req, res) => {
+    const result = await getMe(req.user!.id);
     res.status(200).json(result);
 });
