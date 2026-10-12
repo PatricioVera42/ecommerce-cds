@@ -3,6 +3,7 @@ import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ProductPage } from "./pages/ProductPage";
 
 export function App(){
   return (
@@ -11,6 +12,7 @@ export function App(){
         <Route index element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
+        <Route path="/productos/:id" element={<ProductPage />} />
       </Route>
     </Routes>
   );
