@@ -17,7 +17,7 @@ await prisma.user.upsert({
 
 if((await prisma.product.count()) === 0){
     await mkdir("uploads", { recursive: true });
-    // Rayuela va sin imagen: su tapa no es de dominio público. Sirve para probar el producto sin imagen.
+    // Rayuela va sin imagen a propósito: sirve para probar el producto sin imagen.
     const products: { name: string; description: string; price: number; image?: string }[] = [
         { name: "Rayuela", description: "Novela de Julio Cortázar que se puede leer en más de un orden.",
             price: 2490 },
