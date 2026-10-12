@@ -1,4 +1,5 @@
-import { useNavigate, useParams } from "react-router";
+import { useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
@@ -32,6 +33,7 @@ export function ProductFormPage() {
         queryKey: ["admin", "products", id],
         queryFn: () => api<Product>(`/admin/products/${id}`),
         enabled: isEdit,
+        retry: false,
     });
 
     if (!isEdit) return <ProductForm />;
@@ -53,24 +55,37 @@ function ProductForm({ product }: { product?: Product }) {
                 : { name: "", description: "", price: "", active: true },
     });
 
+    const [image, setImage] = useState<File | null>(null);
+
+    const location = useLocation();
+    const imageError = (location.state as { imageError?: string } | null)?.imageError;
+
     const saveMutation = useMutation({
-        mutationFn: (data: { name: string; description: string; price: number; active: boolean }) => {
-            if (product){
-                return api<Product>(`/admin/products/${product.id}`, {
-                    method: "PATCH",
-                    body: JSON.stringify(data)
-                })
-            } else {
-                return api<Product>("/admin/products", {
+        mutationFn: async (data: { name: string; description: string; price: number; active: boolean }) => {
+
+            const saved = product
+                ? await api<Product>(`/admin/products/${product.id}`, { method: "PATCH", body: JSON.stringify(data) })
+                : await api<Product>("/admin/products", { method: "POST", body: JSON.stringify(data) });
+
+            if(!image) return { saved, imageError: null };
+            
+            try {
+                const body = new FormData();
+                body.append("image", image);
+                await api<Product>(`/admin/products/${saved.id}/image`, {
                     method: "POST",
-                    body: JSON.stringify(data),
+                    body,
                 })
+                return { saved, imageError: null };
+            } catch (error) {
+                return { saved, imageError: error instanceof Error ? error.message : "No se pudo subir la imagen" };
             }
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["admin", "products"] })
-            navigate("/admin/productos");
-        }
+        onSuccess: ({ saved, imageError }) => {
+            queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+            if(!imageError) navigate("/admin/productos")
+            else navigate(`/admin/productos/${saved.id}`, { replace: true, state: { imageError } });
+        },
     });
 
     function onSubmit(values: ProductFormValues) {
@@ -132,6 +147,17 @@ function ProductForm({ product }: { product?: Product }) {
                 )}
             />
 
+            <Field>
+                <FieldLabel htmlFor="image">Imagen (JPEG, PNG o WebP, hasta 2 MB)</FieldLabel>
+                <Input
+                    id="image"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+                />
+            </Field>
+
+            {imageError && <p className="text-destructive">El producto se guardó, pero la imagen no: {imageError}</p>}
             {saveMutation.isError && <p className="text-destructive">{saveMutation.error.message}</p>}
 
             <Button type="submit" disabled={saveMutation.isPending}>Guardar</Button>
