@@ -19,6 +19,7 @@ export function App(){
         <Route element={<RequireAdmin/>}>
           <Route path="/admin/productos" element={ <AdminProductsPage/> }/>
           <Route path="/admin/productos/nuevo" element={ <ProductFormPage/> }/>
+          <Route path="/admin/productos/:id" element={ <ProductFormPage/> }/>
         </Route>
       </Route>
     </Routes>

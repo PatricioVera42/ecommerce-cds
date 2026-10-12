@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,20 +27,45 @@ type ProductFormValues = z.infer<typeof productFormSchema>;
 export function ProductFormPage() {
     const { id } = useParams();
     const isEdit = id !== undefined;
+
+    const productQuery = useQuery({
+        queryKey: ["admin", "products", id],
+        queryFn: () => api<Product>(`/admin/products/${id}`),
+        enabled: isEdit,
+    });
+
+    if (!isEdit) return <ProductForm />;
+
+    if(productQuery.isPending) return <p className="text-muted-foreground">Cargando producto...</p>
+    if(productQuery.isError) return <p className="text-destructive">{ productQuery.error.message }</p>
+
+    return <ProductForm product={productQuery.data} />;
+}
+
+function ProductForm({ product }: { product?: Product }) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     const form = useForm<ProductFormValues>({
         resolver: zodResolver(productFormSchema),
-        defaultValues: { name: "", description: "", price: "", active: true },
+        defaultValues: product ?
+                    { name: product.name, description: product.description, price: (product.price / 100).toFixed(2).replace(".", ","), active: product.active} 
+                : { name: "", description: "", price: "", active: true },
     });
 
     const saveMutation = useMutation({
         mutationFn: (data: { name: string; description: string; price: number; active: boolean }) => {
-            return api<Product>("/admin/products", {
-                method: "POST",
-                body: JSON.stringify(data),
-            })
+            if (product){
+                return api<Product>(`/admin/products/${product.id}`, {
+                    method: "PATCH",
+                    body: JSON.stringify(data)
+                })
+            } else {
+                return api<Product>("/admin/products", {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                })
+            }
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["admin", "products"] })
@@ -58,7 +83,7 @@ export function ProductFormPage() {
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="mx-auto flex max-w-lg flex-col gap-4">
-            <h1 className="text-2xl font-semibold">{isEdit ? "Editar producto" : "Nuevo producto"}</h1>
+            <h1 className="text-2xl font-semibold">{product ? "Editar producto" : "Nuevo producto"}</h1>
 
             <Controller
                 name="name"
