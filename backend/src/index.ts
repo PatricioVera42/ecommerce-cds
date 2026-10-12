@@ -6,6 +6,9 @@ import { errorHandler } from "./middleware/error-handler.js";
 import { authRouter } from "./routes/auth.js";
 import { productsRouter } from "./routes/products.js";
 import path from "node:path";
+import { requireAuth } from "./middleware/require-auth.js";
+import { requireAdmin } from "./middleware/require-admin.js";
+import { adminProductsRouter } from "./routes/admin-products.js";
 
 const app = express();
 const PORT = env.PORT;
@@ -20,6 +23,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/auth", authRouter);
 app.use("/products", productsRouter);
+app.use("/admin/products", requireAuth, requireAdmin, adminProductsRouter);
 
 app.use(notFound);
 app.use(errorHandler);
