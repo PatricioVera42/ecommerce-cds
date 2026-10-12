@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImageOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { buttonVariants } from "@/components/ui/button";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import { formatPrice } from "@/lib/formatPrice";
@@ -29,7 +30,10 @@ export function AdminProductsPage() {
 
     return (
         <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-semibold">Productos</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-semibold">Productos</h1>
+                <Link to="/admin/productos/nuevo" className={buttonVariants()}>Nuevo producto</Link>
+            </div>
 
             {productsQuery.isPending ? (
                 <p className="text-muted-foreground">Cargando productos...</p>
