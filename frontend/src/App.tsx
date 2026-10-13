@@ -7,15 +7,23 @@ import { ProductPage } from "./pages/ProductPage";
 import { AdminProductsPage } from "./pages/AdminProductsPage";
 import { RequireAdmin } from "./components/RequireAdmin";
 import { ProductFormPage } from "./pages/ProductFormPage";
+import { CartPage } from "./pages/CartPage";
+import { Toaster } from "@/components/ui/sonner";
+import { RequireAuth } from "./components/RequireAuth";
 
 export function App(){
   return (
+    <>
+    <Toaster />
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/productos/:id" element={<ProductPage />} />
+        <Route element={ <RequireAuth /> }> 
+          <Route path="/carrito" element={<CartPage />} />
+        </Route>
         <Route element={<RequireAdmin/>}>
           <Route path="/admin/productos" element={ <AdminProductsPage/> }/>
           <Route path="/admin/productos/nuevo" element={ <ProductFormPage/> }/>
@@ -23,6 +31,7 @@ export function App(){
         </Route>
       </Route>
     </Routes>
+    </>
   );
 }
 
