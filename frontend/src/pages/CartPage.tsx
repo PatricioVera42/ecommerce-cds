@@ -4,7 +4,7 @@ import { ImageOff, Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import { formatPrice } from "@/lib/formatPrice";
 import type { Cart } from "@/types/cart";
 
@@ -45,7 +45,26 @@ export function CartPage() {
         }
     });
 
-    const isMutating = updateMutation.isPending || removeMutation.isPending;
+    const checkoutMutation = useMutation({
+        mutationFn: () => {
+            return api<{ url: string }>("/checkout", {
+                method: "POST",
+            })
+        },
+        onSuccess: (data: { url: string}) => {
+            window.location.href = data.url;
+        },
+        onError: (error) => {
+            toast.error(error.message);
+            if (error instanceof ApiError && error.status === 409){
+                queryClient.invalidateQueries({ queryKey: ["cart"] });
+            };
+        }
+    });
+
+    const isMutating = updateMutation.isPending || removeMutation.isPending || checkoutMutation.isPending;
+
+    const hasUnavailable = cartQuery.data?.items.some((i) => !i.product.active);
 
     return (
         <div className="flex flex-col gap-6">
@@ -143,8 +162,22 @@ export function CartPage() {
                     </TableBody>
                 </Table>
 
-                <div className="flex items-center justify-end gap-4">
-                    <span className="text-lg">Total: <strong>{ formatPrice(cartQuery.data.total) }</strong></span>
+                <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-4">
+                        <span className="text-lg">Total: <strong>{ formatPrice(cartQuery.data.total) }</strong></span>
+                        <Button
+                            disabled={isMutating || cartQuery.data.total === 0}
+
+                            onClick={() => checkoutMutation.mutate()}
+                        >
+                            {checkoutMutation.isPending ? "Redirigiendo..." : "Pagar"}
+                        </Button>
+                    </div>
+                    {hasUnavailable && (
+                        <p className="text-muted-foreground text-sm">
+                            Los productos no disponibles quedan en el carrito.
+                        </p>
+                    )}
                 </div>
                 </>
             )}
