@@ -29,7 +29,7 @@ app.use("/products", productsRouter);
 app.use("/admin/products", requireAuth, requireAdmin, adminProductsRouter);
 app.use("/cart", requireAuth, cartRouter);
 app.use("/checkout", requireAuth, checkoutRouter);
-app.use("/orders", requireAuth, ordersRouter)
+app.use("/orders", requireAuth, ordersRouter);
 
 app.use(notFound);
 app.use(errorHandler);

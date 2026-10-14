@@ -12,6 +12,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "./components/RequireAuth";
 import { CheckoutSuccessPage } from "./pages/CheckoutSuccessPage";
 import { CheckoutCancelPage } from "./pages/CheckoutCancelPage";
+import { OrdersPage } from "./pages/OrdersPage";
+import { OrderDetailPage } from "./pages/OrderDetailPage";
 
 export function App(){
   return (
@@ -27,6 +29,8 @@ export function App(){
           <Route path="/carrito" element={<CartPage />} />
           <Route path="/checkout/exito" element={<CheckoutSuccessPage/>} />
           <Route path="/checkout/cancelado" element={<CheckoutCancelPage />} />
+          <Route path="/ordenes" element={<OrdersPage/>} />
+          <Route path="/ordenes/:id" element={<OrderDetailPage/>} />
         </Route>
         <Route element={<RequireAdmin/>}>
           <Route path="/admin/productos" element={ <AdminProductsPage/> }/>
