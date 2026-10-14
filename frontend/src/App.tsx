@@ -10,6 +10,8 @@ import { ProductFormPage } from "./pages/ProductFormPage";
 import { CartPage } from "./pages/CartPage";
 import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "./components/RequireAuth";
+import { CheckoutSuccessPage } from "./pages/CheckoutSuccessPage";
+import { CheckoutCancelPage } from "./pages/CheckoutCancelPage";
 
 export function App(){
   return (
@@ -23,6 +25,8 @@ export function App(){
         <Route path="/productos/:id" element={<ProductPage />} />
         <Route element={ <RequireAuth /> }> 
           <Route path="/carrito" element={<CartPage />} />
+          <Route path="/checkout/exito" element={<CheckoutSuccessPage/>} />
+          <Route path="/checkout/cancelado" element={<CheckoutCancelPage />} />
         </Route>
         <Route element={<RequireAdmin/>}>
           <Route path="/admin/productos" element={ <AdminProductsPage/> }/>
