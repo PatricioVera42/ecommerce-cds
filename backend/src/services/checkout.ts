@@ -71,6 +71,7 @@ export async function createCheckout(userId: string){
                 productId: i.productId,
                 quantity: i.quantity,
                 unitPrice: i.product.price,
+                productName : i.product.name,
             }))},
         },
     });
