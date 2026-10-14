@@ -6,6 +6,26 @@ import { getCart } from "./cart.js";
 import { env } from "../lib/env.js";
 
 
+async function markOrderPaid(orderId: string, userId: string, productIds: string[]) {
+    const [paidOrder] = await prisma.$transaction([
+        prisma.order.update({ where: { id: orderId }, data: { status: "PAID" }, include: { orderItems: true } }),
+        prisma.cartItem.deleteMany({ where: { userId, productId: { in: productIds } } }),
+    ]);
+    return paidOrder;
+};
+
+export async function closePendingOrder(order: {id: string, userId: string, stripeSessionId: string, orderItems: { productId: string }[] }) {
+    const oldSession = await stripe.checkout.sessions.retrieve(order.stripeSessionId);
+    if(oldSession.payment_status === "paid"){                
+        // este if es por si no se llega a confirmar el checkout y la orden queda como PENDING en la bdd pero el pago en Stripe se hizo
+        return await markOrderPaid(order.id, order.userId, order.orderItems.map((i) => i.productId));
+    } else if (oldSession.status === "open"){
+        await stripe.checkout.sessions.expire(order.stripeSessionId);
+    }; 
+    return await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" }, include: { orderItems: true } });
+}
+
+
 export async function createCheckout(userId: string){
     
     const userCart = await getCart(userId);
@@ -14,6 +34,16 @@ export async function createCheckout(userId: string){
     if(activeItems.length === 0) throw new HttpError(400, "No hay productos disponibles para comprar");
     if(userCart.total < MIN_CHECKOUT_AMOUNT) throw new HttpError(400, "El mínimo de compra es 0,50 USD");
     
+    const pendingOrders = await prisma.order.findMany({
+        where: { userId, status: "PENDING" },
+        include: { orderItems: true },
+    });
+
+    for (const order of pendingOrders){
+        const closed = await closePendingOrder(order);
+        if(closed.status === "PAID") throw new HttpError(409, "Tu compra anterior ya estaba pagada. Revisá tu carrito.");
+    }
+
     const orderId = randomUUID();
 
     const session = await stripe.checkout.sessions.create({
@@ -30,10 +60,6 @@ export async function createCheckout(userId: string){
         cancel_url: `${env.FRONTEND_URL}/checkout/cancelado?order_id=${orderId}`,
     });
 
-    // await prisma.order.update({
-    //     where: { userId },
-    //     data: { status: "CANCELLED" }
-    // })
 
     await prisma.order.create({
         data: {
@@ -71,11 +97,7 @@ export async function confirmCheckout(userId: string, sessionId: string) {
 
     const productIdList = order.orderItems.map((i) => i.productId);
 
-    // el [] es para que sea el primero, me quedo con la orden updateada.
-    const [paidOrder] = await prisma.$transaction([
-        prisma.order.update({ where: { id: order.id } , data: { status: "PAID" }, include: { orderItems: true } }),
-        prisma.cartItem.deleteMany({ where: { userId, productId: { in: productIdList } } })
-    ]);
 
-    return paidOrder;
+    return markOrderPaid(order.id, userId, productIdList);
 }
+
