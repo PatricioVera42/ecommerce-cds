@@ -50,4 +50,32 @@ export async function createCheckout(userId: string){
     });
 
     return { url: session.url };
+};
+
+
+export async function confirmCheckout(userId: string, sessionId: string) {
+    
+    const order = await prisma.order.findFirst({
+        where: { userId, stripeSessionId: sessionId},
+        include: { orderItems: true }
+    });
+
+    if (!order) throw new HttpError(404, "Orden no existente");
+    
+    if(order.status === "PAID") return order;
+    if(order.status === "CANCELLED") throw new HttpError(400, "La orden fue cancelada");
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if(session.payment_status !== "paid") throw new HttpError(400, "La orden no ha sido pagada");
+
+    const productIdList = order.orderItems.map((i) => i.productId);
+
+    // el [] es para que sea el primero, me quedo con la orden updateada.
+    const [paidOrder] = await prisma.$transaction([
+        prisma.order.update({ where: { id: order.id } , data: { status: "PAID" }, include: { orderItems: true } }),
+        prisma.cartItem.deleteMany({ where: { userId, productId: { in: productIdList } } })
+    ]);
+
+    return paidOrder;
 }
