@@ -17,6 +17,7 @@ export function Layout() {
                     <>
                         {user.role === "ADMIN" && <Link to="/admin/productos">Panel</Link>}
                         <Link to="/carrito">Carrito</Link>
+                        <Link to="/ordenes">Mis Órdenes</Link>
                         <span className="flex items-center gap-1 text-muted-foreground">
                             <User className="size-4" />
                             {user.name}
