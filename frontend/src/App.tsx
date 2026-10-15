@@ -14,6 +14,7 @@ import { CheckoutSuccessPage } from "./pages/CheckoutSuccessPage";
 import { CheckoutCancelPage } from "./pages/CheckoutCancelPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 export function App(){
   return (
@@ -37,6 +38,7 @@ export function App(){
           <Route path="/admin/productos/nuevo" element={ <ProductFormPage/> }/>
           <Route path="/admin/productos/:id" element={ <ProductFormPage/> }/>
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
     </>
