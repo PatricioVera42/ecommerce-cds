@@ -1,7 +1,7 @@
 import { useAuth } from "@/auth/AuthContext";
 import { Outlet, Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
+import { LogOut, ShoppingCart, User } from "lucide-react";
 
 
 export function Layout() {
@@ -16,13 +16,19 @@ export function Layout() {
                 {user ? (
                     <>
                         {user.role === "ADMIN" && <Link to="/admin/productos">Panel</Link>}
-                        <Link to="/carrito">Carrito</Link>
+                        <Link to="/carrito">
+                            <ShoppingCart className="size-4 sm:hidden" />
+                            <span className="hidden sm:inline">Carrito</span>
+                        </Link>
                         <Link to="/ordenes">Mis Órdenes</Link>
-                        <span className="flex items-center gap-1 text-muted-foreground">
+                        <span className="hidden sm:flex items-center gap-1 text-muted-foreground">
                             <User className="size-4" />
                             {user.name}
                         </span>
-                        <Button variant="ghost" onClick={logout}>Cerrar sesión</Button>                    
+                        <Button variant="ghost" onClick={logout}>
+                            <LogOut className="size-4 sm:hidden" />
+                            <span className="hidden sm:inline">Cerrar sesión</span>
+                        </Button>                    
                     </>
                 ) : (
                     <>

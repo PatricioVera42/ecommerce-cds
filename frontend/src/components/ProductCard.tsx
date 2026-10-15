@@ -56,7 +56,7 @@ export function ProductCard({ product }: { product: Product }) {
                         )}
                     </CardContent>    
                     <CardHeader>
-                        <CardTitle className="line-clamp-2 min-h-10">{ product.name }</CardTitle>
+                        <CardTitle className="line-clamp-2 min-h-12">{ product.name }</CardTitle>
                     </CardHeader>
                 </Link>
                 <CardFooter className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
