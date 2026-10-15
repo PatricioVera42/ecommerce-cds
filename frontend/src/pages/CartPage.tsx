@@ -166,11 +166,11 @@ export function CartPage() {
                     <div className="flex items-center gap-4">
                         <span className="text-lg">Total: <strong>{ formatPrice(cartQuery.data.total) }</strong></span>
                         <Button
-                            disabled={isMutating || cartQuery.data.total === 0}
+                            disabled={isMutating || checkoutMutation.isSuccess || cartQuery.data.total === 0}
 
                             onClick={() => checkoutMutation.mutate()}
                         >
-                            {checkoutMutation.isPending ? "Redirigiendo..." : "Pagar"}
+                            {checkoutMutation.isPending || checkoutMutation.isSuccess ? "Redirigiendo..." : "Pagar"}
                         </Button>
                     </div>
                     {hasUnavailable && (
