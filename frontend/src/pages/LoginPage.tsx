@@ -1,7 +1,7 @@
 import { useAuth, type User } from "@/auth/AuthContext";
 import { api } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,6 +21,7 @@ type LoginValues = z.infer<typeof loginSchema>;
 export function LoginPage() {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const form = useForm<LoginValues>({
         resolver: zodResolver(loginSchema),
@@ -35,7 +36,8 @@ export function LoginPage() {
             }),
         onSuccess: (data) => {
             login(data.token, data.user);
-            navigate("/");
+            const from = location.state?.from ?? "/";
+            navigate(from, {replace: true});
         }
     });
 

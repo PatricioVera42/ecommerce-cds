@@ -17,7 +17,14 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     if (token) {
         headers.Authorization = `Bearer ${token}`;
     }
-    const res = await fetch(import.meta.env.VITE_API_URL + path, { ...options, headers });
+
+    let res: Response;
+    
+    try{
+        res = await fetch(import.meta.env.VITE_API_URL + path, { ...options, headers });
+    } catch {
+        throw new ApiError(0, "No se pudo conectar con el servidor");
+    }
     
     const body = await res.json();
     if(!res.ok) {

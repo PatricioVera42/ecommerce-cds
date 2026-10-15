@@ -40,11 +40,8 @@ export function ProductCard({ product }: { product: Product }) {
     }
 
     return (
-        <Card>
-                <Link to={`/productos/${product.id}`}>
-                    <CardHeader>
-                        <CardTitle>{ product.name }</CardTitle>
-                    </CardHeader>
+        <Card size="sm">
+                <Link to={`/productos/${product.id}`} className="flex flex-col gap-3">
                     <CardContent>
                         {product.imageKey ? (
                             <img
@@ -58,10 +55,13 @@ export function ProductCard({ product }: { product: Product }) {
                             </div>    
                         )}
                     </CardContent>    
+                    <CardHeader>
+                        <CardTitle className="line-clamp-2 min-h-12">{ product.name }</CardTitle>
+                    </CardHeader>
                 </Link>
-                <CardFooter className="flex justify-between">
-                    <p>{ formatPrice(product.price) }</p>
-                    <Button variant="secondary" onClick={ handleAddToCart } disabled={addToCartMutation.isPending}>
+                <CardFooter className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="font-semibold">{ formatPrice(product.price) }</p>
+                    <Button variant="secondary" className="w-full sm:w-auto"  onClick={ handleAddToCart } disabled={addToCartMutation.isPending}>
                         Agregar al carrito
                     </Button>
                 </CardFooter>            
