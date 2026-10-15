@@ -1,11 +1,13 @@
 import { useAuth } from "@/auth/AuthContext";
 import { Outlet, Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { LogOut, ShoppingCart, User } from "lucide-react";
+import { LogOut, Moon, ShoppingCart, Sun, User } from "lucide-react";
+import { useTheme } from "next-themes";
 
 
 export function Layout() {
 
+    const { resolvedTheme, setTheme } = useTheme();
     const { user, logout } = useAuth();
     
     return (
@@ -36,6 +38,11 @@ export function Layout() {
                         <Link to="/registro">Registrarse</Link>
                     </>
                     )}
+                    <Button variant="ghost" size="icon" 
+                        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                    >
+                        { resolvedTheme === "dark" ? <Sun /> : <Moon /> }
+                    </Button>
             </nav>
         </header>
         
