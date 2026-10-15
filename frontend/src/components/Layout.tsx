@@ -10,9 +10,9 @@ export function Layout() {
     
     return (
         <>
-        <header className="flex items-center gap-6 border-b px-6 py-3 text-sm">
+        <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b px-6 py-3 text-sm">
             <Link to="/">Librería</Link>
-            <nav className="ml-auto flex gap-4 items-center">
+            <nav className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-2 whitespace-nowrap">
                 {user ? (
                     <>
                         {user.role === "ADMIN" && <Link to="/admin/productos">Panel</Link>}
